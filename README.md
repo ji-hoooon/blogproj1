@@ -46,9 +46,13 @@
 - 남은 기능 추가하기
 -  보완하고 싶은것 추가하기
 
+
+#### Day 1
 1. yml 설정
 2. package 설정
    - board
    - love
    - reply
    - user
+3. SecurityConfig
+   - 인증 및 권한 설정 : /s/**은 모두 인증 필요한 주소 설정
