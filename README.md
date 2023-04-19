@@ -56,3 +56,16 @@
    - user
 3. SecurityConfig
    - 인증 및 권한 설정 : /s/**은 모두 인증 필요한 주소 설정
+4. 화면 설정
+   - web-inf은 접근 불가능
+   - /webapp은 기본설정 주소 webapp 주소 이후로 적으면 접근가능
+   - viewresolver로 주소 설정
+   ```yaml
+   spring:
+     mvc:
+      view:
+       prefix: /WEB-INF/views/
+       suffix: .jsp
+   ```
+   - header와 footer 설정 (Template Engine 기능)
+     - 결제시스템에서는 footer에 사업자주소 필요 -> 승인
