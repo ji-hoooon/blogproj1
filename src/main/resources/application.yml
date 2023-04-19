@@ -1,0 +1,7 @@
+spring:
+  profiles:
+    active:
+      - dev
+# 사용할 프로파일 명시
+# jar build 할 때 사용할 프로파일을 변경할 수 있다.
+# 배포파일의 실행 : $ java -Dspring.profile.active=prod -jar application.jar
