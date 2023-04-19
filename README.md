@@ -45,3 +45,10 @@
 - 좋아요 보기
 - 남은 기능 추가하기
 -  보완하고 싶은것 추가하기
+
+1. yml 설정
+2. package 설정
+   - board
+   - love
+   - reply
+   - user
