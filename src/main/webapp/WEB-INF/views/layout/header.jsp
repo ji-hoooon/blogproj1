@@ -39,7 +39,8 @@
 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="/board/saveForm">글쓰기</a>
+                <%-- 글쓰기에는 인증 필요--%>
+                    <a class="nav-link" href="/s/board/saveForm">글쓰기</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/user/updateForm">회원정보</a>

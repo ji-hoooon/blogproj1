@@ -21,4 +21,10 @@ public class BoardController {
 //        log.debug("디버그 : "+myUserDetails.getUser().getUsername());
         return "board/main";
     }
+
+    @GetMapping("/s/board/saveForm")
+    public String saveForm(){
+
+        return "board/saveForm";
+    }
 }
