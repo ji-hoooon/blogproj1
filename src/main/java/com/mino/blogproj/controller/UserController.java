@@ -1,6 +1,6 @@
 package com.mino.blogproj.controller;
 
-import com.mino.blogproj.dto.UserRequest;
+import com.mino.blogproj.dto.user.UserRequest;
 import com.mino.blogproj.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;

@@ -1,4 +1,4 @@
-package com.mino.blogproj.dto.user;
+package com.mino.blogproj.model.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

@@ -1,6 +1,6 @@
-package com.mino.blogproj.dto.board;
+package com.mino.blogproj.model.board;
 
-import com.mino.blogproj.dto.user.User;
+import com.mino.blogproj.model.user.User;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

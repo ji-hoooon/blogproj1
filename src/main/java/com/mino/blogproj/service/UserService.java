@@ -1,7 +1,7 @@
 package com.mino.blogproj.service;
 
-import com.mino.blogproj.dto.UserRequest;
-import com.mino.blogproj.dto.user.UserRepository;
+import com.mino.blogproj.dto.user.UserRequest;
+import com.mino.blogproj.model.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;

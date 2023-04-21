@@ -1,7 +1,7 @@
 package com.mino.blogproj;
 
-import com.mino.blogproj.dto.user.User;
-import com.mino.blogproj.dto.user.UserRepository;
+import com.mino.blogproj.model.user.User;
+import com.mino.blogproj.model.user.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

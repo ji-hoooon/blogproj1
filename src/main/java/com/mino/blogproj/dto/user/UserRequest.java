@@ -1,6 +1,6 @@
-package com.mino.blogproj.dto;
+package com.mino.blogproj.dto.user;
 
-import com.mino.blogproj.dto.user.User;
+import com.mino.blogproj.model.user.User;
 import lombok.Getter;
 import lombok.Setter;
 

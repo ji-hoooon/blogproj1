@@ -1,5 +1,6 @@
 package com.mino.blogproj.config;
 
+import com.mino.blogproj.core.auth.MyUserDetails;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 import javax.servlet.FilterChain;
+import javax.servlet.http.HttpSession;
 
 //@Slf4j
 @Configuration
@@ -38,9 +40,16 @@ public class SecurityConfig {
                 .loginPage("/loginForm")
                 //(2) 로그인 프로세스 설정
                 .loginProcessingUrl("/login")
-                //(3) 기본적인 핸들러 설정 성공시엔 기본 페이지 실패시엔 로그인폼
+                //(3) 기본적인 핸들러 설정 성공시엔 기본 페이지 실패시엔 로그인
                 .successHandler((request, response, authentication) ->{
                     log.debug("디버그 : 로그인 성공");
+
+                    //로그인 성공시 메뉴 변경을 위해
+                    MyUserDetails myUserDetails=(MyUserDetails) authentication.getPrincipal();
+                    //principal에 Userdetails가 들어간다. -> 캐스팅 필요
+                    HttpSession session = request.getSession();
+                    session.setAttribute("sessionUser", myUserDetails.getUser());
+
                     response.sendRedirect("/");
 
                 })

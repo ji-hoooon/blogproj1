@@ -1,7 +1,7 @@
 package com.mino.blogproj.core.auth;
 
-import com.mino.blogproj.dto.user.User;
-import com.mino.blogproj.dto.user.UserRepository;
+import com.mino.blogproj.model.user.User;
+import com.mino.blogproj.model.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
