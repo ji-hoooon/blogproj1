@@ -157,11 +157,12 @@
     });
    </script>
    ```
-## 썸머노트 추가한 saveForm을 호출하는 글쓰기
-1. 엔티티 Board 작성 - @Lob, @NoArgs~(AccessLevel.PROTECTED)
-2. 로그인시 메뉴 바뀌도록, 시큐리티가 세션을 관리하고 있으므로 JSP Security Tag Library -> 탬플릿 엔진에 따라 다르므로 비추
-3. SecurityContextHolder에 접근 불가능한 EL 표현식
-4. SecurityConfig에서 로그인 성공시 세션에 추가
+3. 글쓰기
+   ## 썸머노트 추가한 saveForm을 호출하는 글쓰기
+   1. 엔티티 Board 작성 - @Lob, @NoArgs~(AccessLevel.PROTECTED)
+   2. 로그인시 메뉴 바뀌도록, 시큐리티가 세션을 관리하고 있으므로 JSP Security Tag Library -> 탬플릿 엔진에 따라 다르므로 비추
+   3. SecurityContextHolder에 접근 불가능한 EL 표현식
+   4. SecurityConfig에서 로그인 성공시 세션에 추가
 ```java
 //로그인 성공시 메뉴 변경을 위해 -> View에서 접근하려고
 MyUserDetails myUserDetails=(MyUserDetails) authentication.getPrincipal();
@@ -169,27 +170,190 @@ MyUserDetails myUserDetails=(MyUserDetails) authentication.getPrincipal();
 HttpSession session = request.getSession();
 session.setAttribute("sessionUser", myUserDetails.getUser());
 ```
-5. SecurityContextHolder의 세션과 나머지 세션영역은 분리된 영역이지만 JSESSIONID로 둘다 접근 가능 (뷰에서만 세션에서 가져옴)
-6. 로그아웃에서는 모든 세션이 날라간다 sessioninvalidate
-7. 주의할 사항은 유저 정보변경시 직접 동기화 필요
-8. 썸머노트로 글쓰기시 HTML태그가 들어간다.
-9. 이미지 넣을경우 mime타입과 base64로 인코딩해서 들어간다. (바이너리 데이터 -> 문자열 데이터)
-10. 나중에 썸네일 만들때 사용한다.
+   5. SecurityContextHolder의 세션과 나머지 세션영역은 분리된 영역이지만 JSESSIONID로 둘다 접근 가능 (뷰에서만 세션에서 가져옴)
+   6. 로그아웃에서는 모든 세션이 날라간다 sessioninvalidate
+   7. 주의할 사항은 유저 정보변경시 직접 동기화 필요
+   8. 썸머노트로 글쓰기시 HTML태그가 들어간다.
+   9. 이미지 넣을경우 mime타입과 base64로 인코딩해서 들어간다. (바이너리 데이터 -> 문자열 데이터)
+   10. 나중에 썸네일 만들때 사용한다.
+
+4. 글 목록 보기
+   1. 서비스에 readOnly 설정 - 변경을 무시하고 읽기는 가능하도록
+   ```java
+    @Transactional(readOnly = true) 
+    //변경감지 하지않기 위해, 고립성을 지키기 위해 (repeatable read)
+   ```
+   2. 서비스에서 반환된 Page<Board>는 사실상 비영속 상태 (OSIV 비활성화 상태이므로 세션 종료)
+   3. 더미데이터 추가 -> 직접 보기 위해 만들었을 때 User를 Lazy Loading 불가능해서 터짐
+   ```java
+   @Bean
+    CommandLineRunner init(BCryptPasswordEncoder passwordEncoder, UserRepository userRepository, BoardRepository boardRepository) {
+        return args -> {
+            User ssar = User.builder()
+                    .username("ssar")
+                    .password(passwordEncoder.encode("1234"))
+                    .email("ssar@nate.com")
+                    .role("USER")
+                    .profile("person.png")
+                    .build();
+            User cos = User.builder()
+                    .username("cos")
+                    .password(passwordEncoder.encode("1234"))
+                    .email("cos@nate.com")
+                    .role("USER")
+                    .profile("person.png")
+                    .build();
+            userRepository.saveAll(Arrays.asList(ssar, cos));
+
+            Board b1 = Board.builder()
+                    .title("제목1")
+                    .content("내용1")
+                    .user(ssar)
+                    .thumbnail("/upload/person.png")
+                    .build();
+            Board b2 = Board.builder()
+                    .title("제목2")
+                    .content("내용2")
+                    .user(cos)
+                    .thumbnail("/upload/person.png")
+                    .build();
+            boardRepository.saveAll(Arrays.asList(b1, b2));
+        };
+    }
+   ```
 
 ## 코드 설계시 고민한 점
 1. DTO에서 암호화 하는 것과 서비스에서 암호화 하는 것 중 어느 것이 더 좋은 코드일까?
-DTO에서 암호화를 수행하는 경우, 암호화된 비밀번호가 데이터베이스에 저장되므로, 서비스 레이어에서 별도의 암호화 작업이 필요하지 않습니다.
-이는 보안상의 이점을 가질 수 있으며, 클라이언트에서 서버로 전송되는 데이터가 암호화되어 있으므로, 중간자 공격을 방지할 수 있습니다. 
-하지만 DTO가 다른 레이어와 독립적으로 동작하는 것이 이상적이며, DTO가 너무 많은 역할을 하게 될 경우, 유지 보수가 어려워질 수 있습니다.
-반면에 서비스에서 암호화를 수행하는 경우, 서비스 레이어에서 비즈니스 로직과 분리되어 암호화와 관련된 모든 처리를 담당합니다.
-이는 서비스 레이어의 책임을 명확히 할 수 있으며, DTO가 더욱 간결해질 수 있습니다. 하지만 클라이언트에서 서버로 전송되는 데이터가 암호화되지 않으므로, 중간자 공격에 취약할 수 있습니다.
-따라서, 상황에 따라 적절한 방법을 선택하는 것이 좋습니다. 보통은 서비스 레이어에서 암호화를 수행하는 것이 좋은 방법입니다. 
-그러나 클라이언트와 서버 간의 통신이 매우 중요한 경우에는 DTO에서 암호화를 수행하는 것이 더 나은 방법일 수 있습니다.
+- DTO에서 암호화를 수행하는 경우, 암호화된 비밀번호가 데이터베이스에 저장되므로, 서비스 레이어에서 별도의 암호화 작업이 필요하지 않습니다.
+- 이는 보안상의 이점을 가질 수 있으며, 클라이언트에서 서버로 전송되는 데이터가 암호화되어 있으므로, 중간자 공격을 방지할 수 있습니다. 
+- 하지만 DTO가 다른 레이어와 독립적으로 동작하는 것이 이상적이며, DTO가 너무 많은 역할을 하게 될 경우, 유지 보수가 어려워질 수 있습니다.
+- 반면에 서비스에서 암호화를 수행하는 경우, 서비스 레이어에서 비즈니스 로직과 분리되어 암호화와 관련된 모든 처리를 담당합니다.
+- 이는 서비스 레이어의 책임을 명확히 할 수 있으며, DTO가 더욱 간결해질 수 있습니다. 하지만 클라이언트에서 서버로 전송되는 데이터가 암호화되지 않으므로, 중간자 공격에 취약할 수 있습니다.
+- 따라서, 상황에 따라 적절한 방법을 선택하는 것이 좋습니다. 보통은 서비스 레이어에서 암호화를 수행하는 것이 좋은 방법입니다. 
+- 그러나 클라이언트와 서버 간의 통신이 매우 중요한 경우에는 DTO에서 암호화를 수행하는 것이 더 나은 방법일 수 있습니다.
 
-2. 세션에는 User정보가 있는데 디비에 User정보가 없을 수도 있을까? 팬텀 객체?
-세션에는 User 정보가 있을 수 있지만, 디비(Database)에는 해당 User 정보가 없을 수 있습니다. 이는 팬텀 객체(Phantom Object)와 관련이 있습니다.
-팬텀 객체란, ORM(Object-Relational Mapping) 기술을 사용할 때, 데이터베이스와의 동기화가 이루어지지 않은 객체를 의미합니다. 즉, 데이터베이스에는 해당 객체가 존재하지 않는데도, 해당 객체를 메모리에 불러와 사용할 때 발생할 수 있는 문제를 말합니다.
-예를 들어, 세션에 저장된 User 정보는 이전에 로그인한 사용자의 정보일 수 있습니다. 
-그러나 해당 사용자가 데이터베이스에서 삭제된 경우, 세션에는 여전히 사용자 정보가 남아 있을 수 있습니다. 이 경우, 해당 User 객체는 팬텀 객체가 됩니다. 따라서 이 객체를 사용하면 데이터베이스와 동기화되지 않은 정보를 사용하게 됩니다.
-따라서 ORM을 사용할 때는 이러한 팬텀 객체에 대한 처리를 고려해야 합니다. 일반적으로는 데이터베이스에 존재하지 않는 객체를 사용할 때 예외 처리를 하거나, 해당 객체가 삭제되었음을 알리는 메시지를 출력하는 등의 방법으로 처리합니다.
+2. 세션에는 User정보가 있는데 디비에 User정보가 없을 수도 있을까?
+- 세션에는 User 정보가 있을 수 있지만, 디비(Database)에는 해당 User 정보가 없을 수 있습니다. 이는 팬텀 객체(Phantom Object)와 관련이 있습니다.
+- 팬텀 객체란, ORM(Object-Relational Mapping) 기술을 사용할 때, 데이터베이스와의 동기화가 이루어지지 않은 객체를 의미합니다. 
+- 즉, 데이터베이스에는 해당 객체가 존재하지 않는데도, 해당 객체를 메모리에 불러와 사용할 때 발생할 수 있는 문제를 말합니다.
+- 예를 들어, 세션에 저장된 User 정보는 이전에 로그인한 사용자의 정보일 수 있습니다. 
+- 그러나 해당 사용자가 데이터베이스에서 삭제된 경우, 세션에는 여전히 사용자 정보가 남아 있을 수 있습니다. 이 경우, 해당 User 객체는 팬텀 객체가 됩니다. 따라서 이 객체를 사용하면 데이터베이스와 동기화되지 않은 정보를 사용하게 됩니다.
+- 따라서 ORM을 사용할 때는 이러한 팬텀 객체에 대한 처리를 고려해야 합니다. 일반적으로는 데이터베이스에 존재하지 않는 객체를 사용할 때 예외 처리를 하거나, 해당 객체가 삭제되었음을 알리는 메시지를 출력하는 등의 방법으로 처리합니다.
 
+3. @PageDefault, Pageable과 차이가 뭘까
+- @PageDefault와 Pageable은 모두 스프링 프레임워크에서 제공하는 페이징 처리 기능을 위한 인터페이스 및 어노테이션입니다.
+- @PageDefault는 페이징 처리 시 기본 값 설정을 위한 어노테이션으로, 페이지 크기(page size)와 페이지 번호(page number)를 기본값으로 설정할 수 있습니다. 이를 사용하여 기본값을 설정하면, 컨트롤러에서 페이징 처리 시 해당 어노테이션으로 설정한 값이 적용됩니다.
+- 반면, Pageable은 스프링에서 제공하는 페이징 처리를 위한 인터페이스로, 페이징 정보를 포함하는 객체입니다. Pageable 객체를 사용하면 페이징 처리 시 페이지 번호, 페이지 크기, 정렬 조건 등 다양한 정보를 설정할 수 있습니다.
+- 어떤 방식이 더 좋은지는 사용하는 상황에 따라 다릅니다. @PageDefault를 사용하면 컨트롤러에서 간단하게 기본값을 설정할 수 있어 편리합니다. 하지만 Pageable 객체를 사용하면 페이지 크기, 페이지 번호, 정렬 조건 등 다양한 정보를 설정할 수 있어 더욱 유연한 페이징 처리가 가능합니다.
+- 따라서, 페이징 처리의 복잡도가 높을 경우 Pageable 객체를 직접 만들어서 사용하는 것이 좋습니다. 그러나 간단한 페이징 처리에서는 @PageDefault를 사용하는 것이 더 효율적일 수 있습니다. 사용 상황에 따라 적절한 방법을 선택하는 것이 중요합니다.
+
+4. open-in-view를 false하면 발생할 문제가 어떤게 있을까
+open-in-view(또는 OpenSessionInView)는 스프링 프레임워크에서 제공하는 옵션 중 하나로, 데이터베이스 연결을 트랜잭션 범위가 아닌 HTTP 요청 범위까지 연장하여 영속성 컨텍스트를 유지하는 방식입니다.
+이 옵션을 사용하면 지연로딩(lazy loading)을 포함한 다양한 ORM(Object-Relational Mapping) 작업을 수행할 때 유용합니다.
+그러나, Open-in-view를 false로 설정하면 영속성 컨텍스트를 HTTP 요청 범위까지 확장하지 않습니다. 이 경우, HTTP 요청이 끝나면 영속성 컨텍스트가 종료되기 때문에, 
+다음과 같은 문제가 발생할 수 있습니다.
+   1. 지연로딩(lazy loading) 오류: Open-in-view를 사용하지 않으면 지연로딩을 포함한 ORM 작업을 수행할 때, HTTP 요청 범위에서 이미 영속성 컨텍스트가 종료된 상태이므로 지연로딩 오류가 발생합니다.
+   2. 성능 저하: Open-in-view를 사용하지 않으면, 매 HTTP 요청마다 영속성 컨텍스트를 새로 만들고 종료하기 때문에 성능이 저하될 수 있습니다.
+   3. 메모리 누수: Open-in-view를 사용하지 않으면, HTTP 요청 범위 밖에서도 영속성 컨텍스트가 살아있는 경우가 발생할 수 있습니다. 이 경우, 메모리 누수가 발생할 수 있습니다.
+따라서, Open-in-view를 false로 설정하면 ORM 작업에서 오류가 발생하거나 성능이 저하될 수 있으므로, 적절한 상황에서는 사용하지 않는 것이 좋습니다. 그러나, Open-in-view를 사용하지 않는 것이 필요한 경우에는 수동으로 트랜잭션을 열고 닫는 방식으로 ORM 작업을 수행해야 합니다.
+
+5. Page 객체 구조
+```json
+{
+  "content": [
+    {
+      "id": 1,
+      "user": {
+        "id": 1,
+        "username": "ssar",
+        "password": "$2a$10$O5/W0XuCW9EnQyK0XBT4TOos74I5prcSMTPx0t1XvTUN5WBJBK/zC",
+        "email": "ssar@nate.com",
+        "role": "USER",
+        "profile": "person.png",
+        "status": null,
+        "createdAt": "2023-04-21T21:55:12.401086",
+        "updatedAt": null
+      },
+      "title": "제목1",
+      "content": "내용1",
+      "thumbnail": "/upload/person.png",
+      "createdAt": "2023-04-21T21:55:12.439085",
+      "updatedAt": null
+    },
+    {
+      "id": 2,
+      "user": {
+        "id": 2,
+        "username": "cos",
+        "password": "$2a$10$qh72dfNLKk4bAIMlYvypHuRvA0z66TnCsV4GbTFchOutFa4dppcyS",
+        "email": "cos@nate.com",
+        "role": "USER",
+        "profile": "person.png",
+        "status": null,
+        "createdAt": "2023-04-21T21:55:12.431084",
+        "updatedAt": null
+      },
+      "title": "제목2",
+      "content": "내용2",
+      "thumbnail": "/upload/person.png",
+      "createdAt": "2023-04-21T21:55:12.443085",
+      "updatedAt": null
+    }
+  ],
+  "pageable": {
+    "sort": {
+      "empty": false,
+      "sorted": true,
+      "unsorted": false
+    },
+    "offset": 0,
+    "pageSize": 8,
+    "pageNumber": 0,
+    "unpaged": false,
+    "paged": true
+  },
+  "last": true,
+  "totalElements": 2,
+  "totalPages": 1,
+  "size": 8,
+  "number": 0,
+  "sort": {
+    "empty": false,
+    "sorted": true,
+    "unsorted": false
+  },
+  "first": true,
+  "numberOfElements": 2,
+  "empty": false
+}
+```
+## 해결방법
+1) 새로운 리포지토리에 필요할때마다 Join fetch로 만들어서 사용한다. -이너 조인이 발생 
+2) @EntityGraph 이용 - leftOuterJoin이 발생하므로 좋지는 않다.
+3) batch size 설정
+
+여러가지 방법의 장단점
+: Join fetch, @EntityGraph, batch size는 모두 Hibernate의 성능 최적화를 위한 기능으로, 각각의 특징과 적용 방법을 고려하여 사용해야 합니다.
+
+1. Join fetch
+- Join fetch는 JPQL에서 사용하는 기능으로, 연관된 엔티티를 한 번에 조회할 수 있도록 지원합니다.
+- 이를 통해 n+1 문제를 해결할 수 있으며, 연관된 엔티티를 지연로딩하지 않고 즉시 로딩하여 조회합니다
+  - 사용하기 쉽고 간단하게 적용할 수 있습니다.
+  - 쿼리 결과를 즉시 로딩하기 때문에, 연관된 엔티티 수가 많을 경우 메모리 부족이 발생할 수 있습니다.
+  - 복잡한 쿼리를 작성할 경우 성능이 저하될 수 있습니다.
+  - 따라서, Join fetch는 간단한 쿼리에서 적용하기 적합하며, 연관된 엔티티 수가 적을 때 성능 최적화에 효과적입니다.
+
+2. @EntityGraph
+- @EntityGraph는 Hibernate 5.1 이상부터 지원하는 기능으로, 연관된 엔티티를 즉시 로딩하면서도, 메모리를 효율적으로 사용할 수 있도록 지원합니다.
+   - 연관된 엔티티를 즉시 로딩하면서도 메모리를 효율적으로 사용할 수 있습니다. 
+   - 복잡한 쿼리에서도 성능이 유지됩니다. 
+   - @EntityGraph를 적용할 때, join fetch보다 더욱 세밀한 조정이 가능합니다. 
+   - 하지만, @EntityGraph는 애플리케이션에서 사용하는 엔티티에 대해 개발자가 직접 정의해주어야 하기 때문에, 사용하기에는 조금 더 복잡합니다.
+
+3. Batch size
+- Batch size는 Hibernate의 Batch Fetching 기능 중 하나로, 여러 엔티티를 한 번에 가져와 메모리 소비를 줄이고 성능을 향상시키는 방법입니다. 
+  - 여러 엔티티를 한 번에 조회하여 메모리 소비를 줄일 수 있습니다.
+  - Join fetch와 달리, 복잡한 쿼리에서도 성능이 유지됩니다.
+  - Batch size를 적용하려면, 엔티티 클래스의 @OneToMany 또는 @ManyToMany 어노테이션에 @BatchSize 어노테이션을 추가하여 사용합니다.
+  - Batch size는 간단한 쿼리에서 사용하기 적합하며, 연관된 엔티티 수가 많을 때 성능 최적화에 효과적입니다.
+  - 하지만 Batch size는 연관된 엔티티를 한 번에 조회하므로, 엔티티의 수가 많으면 메모리 사용량이 늘어나 성능에 오히려 악영향을 미칠 수 있습니다.

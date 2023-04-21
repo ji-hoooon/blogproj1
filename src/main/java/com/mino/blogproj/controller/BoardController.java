@@ -2,13 +2,20 @@ package com.mino.blogproj.controller;
 
 import com.mino.blogproj.core.auth.MyUserDetails;
 import com.mino.blogproj.dto.board.BoardRequest;
+import com.mino.blogproj.model.board.Board;
 import com.mino.blogproj.service.BoardService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @RequiredArgsConstructor
 @Controller
@@ -19,10 +26,24 @@ public class BoardController {
 
     //: 협업 컨벤션
     @GetMapping({"/", "/board"})
-    public String main(){
+    //@RequestParam은 기본값 설정이 필요할 때 사용한다.
+    public @ResponseBody Page<Board> main(@RequestParam(defaultValue = "0") Integer page, Model model){   //쿼리스트링 Pathvariable X, Null처리하기위해 래핑클래스 사용
+//    public String main(@RequestParam(defaultValue = "0") Integer page){   //쿼리스트링 Pathvariable X, Null처리하기위해 래핑클래스 사용
 //    public String main(@AuthenticationPrincipal MyUserDetails myUserDetails){
 //        log.debug("디버그 : "+myUserDetails.getUser().getUsername());
-        return "board/main";
+
+        PageRequest pageRequest=PageRequest.of(page, 8, Sort.by("id").descending());
+        //@PageDefault, Pageable과 차이가 뭘까 -어노테이션은 비추
+        Page<Board> boardPG = boardService.글목록보기(pageRequest);
+        //OSIV가 꺼져있어서 비영속이라고 봐야한다 (영속성컨텍스트엔 존재하지만, 조회가 불가능한 세션에 연결이 안된다. 즉, 변경감지 불가능
+        //OSIV가 켜져있으면 영속 상태
+
+        //return "board/main";
+
+        //뷰에서 사용하기 위해서 모델에 추가한다.
+        model.addAttribute("boardPG", boardPG);
+
+        return boardPG;
     }
 
     @GetMapping("/s/board/saveForm")
@@ -35,4 +56,5 @@ public class BoardController {
         boardService.글쓰기(saveInDTO, myUserDetails.getUser().getId());
         return "redirect:/";
     }
+
 }
