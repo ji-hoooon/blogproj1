@@ -1,4 +1,4 @@
-package com.mino.blogproj.controller;
+package com.mino.blogproj.controller.viewtest;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

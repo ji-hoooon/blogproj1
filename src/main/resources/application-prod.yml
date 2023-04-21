@@ -18,6 +18,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
+# 배포시에는 디비 반드시 직접 만들어야 한다.
       default_batch_fetch_size: 100 # in query
     open-in-view: false
 logging:

@@ -28,6 +28,8 @@ public class SecurityConfig {
     SecurityFilterChain FilterChain(HttpSecurity http) throws  Exception{
         //1. CSRF 해제 - 운영시에는 프론트엔드 주소만 열기
         http.csrf().disable();
+        //1-2. iframe 해제 (시큐리티 h2-console 접속 허용을 위해)
+        http.headers().frameOptions().disable();
         //2. form 로그인 설정
         //: 커멜 표기법 -> 코드컨벤션
         //-> 하이픈이 원래 표준이지만, JSP와 구분하기 위해

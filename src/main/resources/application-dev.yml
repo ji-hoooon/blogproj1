@@ -27,6 +27,7 @@ spring:
         format_sql: true
       default_batch_fetch_size: 100 # in query
     open-in-view: false
+#    false이면 트랜잭션 종료시점에 DB 세션 종료 -> 트랜잭션 종료 후, LAZY LOADING 발동 불가
   output:
     ansi:
       enabled: always # vscode console color
@@ -36,3 +37,4 @@ logging:
     '[org.hibernate.type]': TRACE
     # 개발은 trace
     # trace -> debug -> info -> warn -> error
+    # 개발시에만 TRACE

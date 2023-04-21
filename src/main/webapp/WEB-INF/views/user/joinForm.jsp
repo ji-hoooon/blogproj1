@@ -4,7 +4,9 @@
 
 <div class="container my-3">
     <div class="container">
-        <form onsubmit="return valid()">
+<%--        form action, method 정의--%>
+        <form action="/join" method="post" onsubmit="return valid()">
+<%-- true시에만 발동하도록 --%>
             <div class="d-flex form-group mb-2">
                 <input type="text" name="username" class="form-control" placeholder="Enter username"
                        id="username">
@@ -26,6 +28,7 @@
             </div>
 
             <button class="btn btn-primary">회원가입</button>
+<%-- 폼 타입 안에 있는 버튼 기본타입은 submit--%>
         </form>
 
     </div>
@@ -34,6 +37,8 @@
 <script>
     function valid() {
         alert("회원가입 유효성 검사");
+        // 임시로 회원가입 항상 발동하도록 설정(유효성 검사 구현 전)
+        return true;
     }
 </script>
 
