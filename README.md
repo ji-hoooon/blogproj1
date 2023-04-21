@@ -96,23 +96,49 @@
 2. 로그인 (시큐리티 구현)
 
 ### 소주제
-1. API 패키지 뷰테스트 패키지 작성
-2. Join 핸들러 메서드 작성
-3. 엔티티 -> Repository -> DTO 작성
-4. Contorller의 역할은 요청의 유효성 검사하고 Service에 요청을 전달하는 것
-5. 동일한 유저네임으로 회원가입시
-   - JPA가 만든 메서드 에러 발생시 -> 제어권을 JPA가 가지고 있다.
-   - save함수는 JPA가 작성 -> save에는 throw가 없음 -> try-catch문으로 직접 제어
-   - save 내부에서 에러 터짐 - DataIntegrationViolationException 발동
-   - 컨트롤러로 처리하지 않고, save 내부에서 터진 서비스의 책임으로 직접 처리해야한다. -> throw로 던지지 못한다.
-6. 더미 데이터 작성
-7. H2 콘솔 보안 해제 
-   - frameOption 해제
-   - http.headers().frameOptions().disable();
-8. joinform 유효성 검사 잠시 해제하고 화면 개발
-   - 이메일 형식 유효성검사는 살아있다.
-9. 
-
+1. 회원가입
+   1. API 패키지 뷰테스트 패키지 작성
+   2. Join 핸들러 메서드 작성
+   3. 엔티티 -> Repository -> DTO 작성
+   4. Contorller의 역할은 요청의 유효성 검사하고 Service에 요청을 전달하는 것
+   5. 동일한 유저네임으로 회원가입시
+      - JPA가 만든 메서드 에러 발생시 -> 제어권을 JPA가 가지고 있다.
+      - save함수는 JPA가 작성 -> save에는 throw가 없음 -> try-catch문으로 직접 제어
+      - save 내부에서 에러 터짐 - DataIntegrationViolationException 발동
+      - 컨트롤러로 처리하지 않고, save 내부에서 터진 서비스의 책임으로 직접 처리해야한다. -> throw로 던지지 못한다.
+   6. 더미 데이터 작성
+   ```java
+       //개발중에서만 사용하는 어노테이션
+       @Profile("dev")
+       //화면 테스트시 회원가입하는 과정을 하지 않기 위해서
+       @Bean
+       CommandLineRunner init(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder){
+           return args -> {
+               User ssar = User.builder()
+                       .username("ssar")
+                       .password(passwordEncoder.encode("1234"))
+                       .email("ssar@nate.com")
+                       .role("USER")
+                       .profile("person.png")
+                       .status(true)
+                       .build();
+               userRepository.save(ssar);
+           };
+       }
+   ```
+   7. H2 콘솔 보안 해제 
+      - frameOption 해제
+      - http.headers().frameOptions().disable();
+   8. joinForm 유효성 검사 잠시 해제하고 화면 개발
+      - 이메일 형식 유효성검사는 살아있다.
+      - 중복 확인, 유효성검사 추후에 개발
+2. 로그인
+   1. UserDetailsService, UserDetails 작성
+   2. UserDetailsService를 커스터마이징 해야함
+   3. 회원을 찾지 못했을때 UsernameNotFoundException 던지도록 한다.
+   4. loginProcessingUrl로 인해 MyUserDetaislsService 호출 (post, x-www-form-urlEncoded)
+   5. 뷰에서 action에 /login 페이지 남겨서 타도록 설정
+   5. 세션 값 확인 필요
 ## 코드 설계시 고민한 점
 1.DTO에서 암호화 하는 것과 서비스에서 암호화 하는 것 중 어느 것이 더 좋은 코드일까?
 DTO에서 암호화를 수행하는 경우, 암호화된 비밀번호가 데이터베이스에 저장되므로, 서비스 레이어에서 별도의 암호화 작업이 필요하지 않습니다.

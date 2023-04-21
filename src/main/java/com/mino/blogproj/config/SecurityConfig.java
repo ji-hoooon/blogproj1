@@ -38,13 +38,16 @@ public class SecurityConfig {
                 .loginPage("/loginForm")
                 //(2) 로그인 프로세스 설정
                 .loginProcessingUrl("/login")
+                //(3) 기본적인 핸들러 설정 성공시엔 기본 페이지 실패시엔 로그인폼
                 .successHandler((request, response, authentication) ->{
                     log.debug("디버그 : 로그인 성공");
+                    response.sendRedirect("/");
 
                 })
                 //(3) 엔트리 포인트 설정 -> 인증과 권한 실패시 -> TranslationFilter가 호출
                 .failureHandler((request, response, exception) ->{
                     log.debug("디버그 : 로그인 실패"+exception.getMessage());
+                    response.sendRedirect("/loginForm");
 
                 });
         //3. 인증, 권한 필터 설정
