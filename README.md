@@ -28,7 +28,7 @@
 - 회원가입
 - 로그인 (시큐리티)
 - 글쓰기 (섬머노트)
-- 게시글 목록보기 (LAZY 전략 - N+1 해결 방법)
+- 게시글 목록보기과 페이징 (LAZY 전략 - N+1 해결 방법)
 - 게시글 상세보기 (데이터 출력)
 - 썸네일 등록하기 (Jsoup API 이용)
 #### 요구사항 2단계
@@ -45,7 +45,6 @@
 - 회원정보 수정
 - 에러 로그 테이블 관리
 #### 요구사항 4단계
-- 페이징
 - 검색
 #### 요구사항 5단계
 - Love 테이블 생성
@@ -310,6 +309,23 @@ session.setAttribute("sessionUser", myUserDetails.getUser());
     - <li class="page-item ${boardPG.last ? "disabled" : ""}"><a class="page-link" href="/?page=${boardPG.number +1}">Next</a></li>
     - 현재 페이지를 이용해 이전, 다음 페이지를 구한다. 
     - previous와 Next 비활성화를 담당한다.
+
+8. findAll()
+   - 리포지토리 테스트
+9. 실무적인 쿼리
+   1. @ManyToOne만 사용
+   2. 모든 것은 Lazy 전략
+   3. Repo -> Test 쿼리 확인 (N+1 발생시) -> fetch Join
+      1. 데이터의 크기에 따라 다름
+      2. 적은 유저가 많은 데이터 작성 시엔 inQuery
+      3. 그 외엔 모두 fetch join
+      4. Page 직접 만든 이유 findAll 사용시 N+1발동하기 떄문에
+   5. OSIV는 False
+   6. 서비스에서 응답 DTO 작성 -> 컨트롤러에게 전달
+   7. 단방향 매핑시 -> User, Account, Transaction 모두 보고 싶을 때
+      1. select Account -> Join Fetch User (one 방향은 페치조인)
+      2. select Transaction -> 총 2번 조회
+      3. 즉 DTO(Account, TransactinList)으로 만들어서 스트림으로 처리
 
 ## N+1 해결방법
 1) 새로운 리포지토리에 필요할때마다 Join fetch로 만들어서 사용한다. -이너 조인이 발생 
