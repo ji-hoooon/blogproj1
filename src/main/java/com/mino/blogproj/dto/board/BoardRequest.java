@@ -14,12 +14,12 @@ public class BoardRequest {
         private String content;
 
         //checkpoint: 썸네일을 받아야 한다.
-        public Board toEntity(User user){
+        public Board toEntity(User user, String thumbnail){
             return Board.builder()
                     .user(user)
                     .title(title)
                     .content(content)
-                    .thumbnail(null)
+                    .thumbnail(thumbnail)
                     .build();
         }
     }

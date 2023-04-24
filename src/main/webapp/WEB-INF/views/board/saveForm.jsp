@@ -4,7 +4,6 @@
 
 <div class="container my-3">
     <form action="/s/board/save" method="post" class="mb-1">
-    <%--/s/board/save 요청--%>
         <div class="form-group">
             <input type="text" class="form-control" placeholder="Enter title" name="title">
         </div>

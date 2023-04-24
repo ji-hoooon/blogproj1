@@ -3,17 +3,20 @@
 <%@ include file="../layout/header.jsp" %>
 
 <div class="container my-3">
+    <div class="d-flex justify-content-end">
+        <form class="d-flex col-lg-3" action="/" method="get">
+            <input class="form-control" type="text" placeholder="Search" name="keyword">
+            <button class="btn btn-primary">Search</button>
+        </form>
+    </div>
     <div class="my-board-box row">
 <%--        for문으로 글 출력--%>
 <%--        안에 있는 데이터를 가져와야하므로, '.'으로 접근--%>
-    <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-    <%@ include file="../layout/header.jsp" %>
-    <div class="container my-3">
-        <div class="my-board-box row">
             <c:forEach items="${boardPG.content}" var="board">
                 <%-- 글 아이템 시작 --%>
                 <div class="card col-lg-3 pt-2">
-                    <img class="card-img-top" style="height: 250px;" src="/images/dora.png" alt="Card image">
+<%--                    <img class="card-img-top" style="height: 250px;" src="/images/dora.png" alt="Card image">--%>
+                    <img class="card-img-top" style="height: 250px;" src="${board.thumbnail}" alt="Card image">
                     <hr/>
                     <div class="card-body">
                         <div>작성자 : ${board.user.username}</div>

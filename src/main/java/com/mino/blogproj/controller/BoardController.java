@@ -15,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -26,34 +27,40 @@ public class BoardController {
     //RestAPI 주소 설계 규칙에서 자원은 복수를 붙인다. -> noSQL
 
     //: 협업 컨벤션
+//    @GetMapping({"/", "/board"})
+//    //@RequestParam은 기본값 설정이 필요할 때 사용한다.
+//    public @ResponseBody Page<Board> main(@RequestParam(defaultValue = "0") Integer page, Model model){   //쿼리스트링 Pathvariable X, Null처리하기위해 래핑클래스 사용
+////    public String main(@RequestParam(defaultValue = "0") Integer page){   //쿼리스트링 Pathvariable X, Null처리하기위해 래핑클래스 사용
+////    public String main(@AuthenticationPrincipal MyUserDetails myUserDetails){
+////        log.debug("디버그 : "+myUserDetails.getUser().getUsername());
+//
+//        PageRequest pageRequest=PageRequest.of(page, 8, Sort.by("id").descending());
+//        //@PageDefault, Pageable과 차이가 뭘까 -어노테이션은 비추
+////        Page<Board> boardPG = boardService.글목록보기(pageRequest);
+//        Page<Board> boardPG = boardService.글목록보기(page);
+//        //OSIV가 꺼져있어서 비영속이라고 봐야한다 (영속성컨텍스트엔 존재하지만, 조회가 불가능한 세션에 연결이 안된다. 즉, 변경감지 불가능
+//        //OSIV가 켜져있으면 영속 상태
+//
+//        //return "board/main";
+//
+//        //뷰에서 사용하기 위해서 모델에 추가한다.
+//        model.addAttribute("boardPG", boardPG);
+//
+//        return boardPG;
+//    }
+    // RestAPI 주소 설계 규칙에서 자원에는 복수를 붙인다. boards 정석!!
     @GetMapping({"/", "/board"})
-    //@RequestParam은 기본값 설정이 필요할 때 사용한다.
-    public @ResponseBody Page<Board> main(@RequestParam(defaultValue = "0") Integer page, Model model){   //쿼리스트링 Pathvariable X, Null처리하기위해 래핑클래스 사용
-//    public String main(@RequestParam(defaultValue = "0") Integer page){   //쿼리스트링 Pathvariable X, Null처리하기위해 래핑클래스 사용
-//    public String main(@AuthenticationPrincipal MyUserDetails myUserDetails){
-//        log.debug("디버그 : "+myUserDetails.getUser().getUsername());
-
-        PageRequest pageRequest=PageRequest.of(page, 8, Sort.by("id").descending());
-        //@PageDefault, Pageable과 차이가 뭘까 -어노테이션은 비추
-//        Page<Board> boardPG = boardService.글목록보기(pageRequest);
+    public String main(@RequestParam(defaultValue = "0") int page, Model model){
         Page<Board> boardPG = boardService.글목록보기(page);
-        //OSIV가 꺼져있어서 비영속이라고 봐야한다 (영속성컨텍스트엔 존재하지만, 조회가 불가능한 세션에 연결이 안된다. 즉, 변경감지 불가능
-        //OSIV가 켜져있으면 영속 상태
-
-        //return "board/main";
-
-        //뷰에서 사용하기 위해서 모델에 추가한다.
         model.addAttribute("boardPG", boardPG);
-
-        return boardPG;
+        return "board/main";
     }
 
     @GetMapping("/s/board/saveForm")
     public String saveForm(){
-
         return "board/saveForm";
     }
-    @GetMapping("/s/board/save")
+    @PostMapping("/s/board/save")
     public String save(BoardRequest.SaveInDTO saveInDTO, @AuthenticationPrincipal MyUserDetails myUserDetails){
         boardService.글쓰기(saveInDTO, myUserDetails.getUser().getId());
         return "redirect:/";
