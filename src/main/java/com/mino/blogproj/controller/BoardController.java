@@ -34,7 +34,8 @@ public class BoardController {
 
         PageRequest pageRequest=PageRequest.of(page, 8, Sort.by("id").descending());
         //@PageDefault, Pageable과 차이가 뭘까 -어노테이션은 비추
-        Page<Board> boardPG = boardService.글목록보기(pageRequest);
+//        Page<Board> boardPG = boardService.글목록보기(pageRequest);
+        Page<Board> boardPG = boardService.글목록보기(page);
         //OSIV가 꺼져있어서 비영속이라고 봐야한다 (영속성컨텍스트엔 존재하지만, 조회가 불가능한 세션에 연결이 안된다. 즉, 변경감지 불가능
         //OSIV가 켜져있으면 영속 상태
 

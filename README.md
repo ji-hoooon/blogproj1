@@ -295,7 +295,23 @@ session.setAttribute("sessionUser", myUserDetails.getUser());
 
 
 ```
-## 해결방법
+
+6. Page 객체 뿌리기
+   - content
+   - pageSize
+   - last
+   - first
+   - number
+   - totalPage
+
+7. 화면단
+    6. 삼항 연사자 사용해서 구현
+    - <li class="page-item ${boardPG.first ? "disabled" : ""}"><a class="page-link" href="/?page=${boardPG.number -1}">Previous</a></li>
+    - <li class="page-item ${boardPG.last ? "disabled" : ""}"><a class="page-link" href="/?page=${boardPG.number +1}">Next</a></li>
+    - 현재 페이지를 이용해 이전, 다음 페이지를 구한다. 
+    - previous와 Next 비활성화를 담당한다.
+
+## N+1 해결방법
 1) 새로운 리포지토리에 필요할때마다 Join fetch로 만들어서 사용한다. -이너 조인이 발생 
 2) @EntityGraph 이용 - leftOuterJoin이 발생하므로 좋지는 않다.
 3) batch size 설정
