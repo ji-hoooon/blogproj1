@@ -48,10 +48,12 @@ public class BoardService {
 
     @Transactional(readOnly = true)
     //변경감지 하지않기 위해, 고립성을 지키기 위해 (repeatable read)
-    public Page<Board> 글목록보기(Pageable pageable) {   //CSR은 DTO로 변경해서 돌려줘야 한다.
+//    public Page<Board> 글목록보기(Pageable pageable) {   //CSR은 DTO로 변경해서 돌려줘야 한다.
+    public Page<Board> 글목록보기(int page) {   //CSR은 DTO로 변경해서 돌려줘야 한다.
 //        return boardRepository.findAll(pageable);   //여기에선 아직 영속화된 상태 컨트롤러로 넘어가면 비영속상태
         //JPA가 Page로 바꿔서 준다.
-        return boardQueryRepository.findAll(pageable);   //여기에선 아직 영속화된 상태 컨트롤러로 넘어가면 비영속상태
+//        return boardQueryRepository.findAll(pageable);   //여기에선 아직 영속화된 상태 컨트롤러로 넘어가면 비영속상태
+        return boardQueryRepository.findAll(page);   //여기에선 아직 영속화된 상태 컨트롤러로 넘어가면 비영속상태
         //-> EntityGraph도 가능
 
         //Join fetch로 해결하는게 좋다.

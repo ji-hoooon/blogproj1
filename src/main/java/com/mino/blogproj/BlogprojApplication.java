@@ -14,7 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.util.Arrays;
 
 @SpringBootApplication
-public class BlogprojApplication {
+public class BlogprojApplication{
 
 
     //개발중에서만 사용하는 어노테이션
