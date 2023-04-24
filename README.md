@@ -295,7 +295,9 @@ session.setAttribute("sessionUser", myUserDetails.getUser());
 
 ```
 
-6. Page 객체 뿌리기
+#### Day 3
+
+1. Page 객체 뿌리기
    - content
    - pageSize
    - last
@@ -303,16 +305,16 @@ session.setAttribute("sessionUser", myUserDetails.getUser());
    - number
    - totalPage
 
-7. 화면단
+3. 화면단
     6. 삼항 연사자 사용해서 구현
     - <li class="page-item ${boardPG.first ? "disabled" : ""}"><a class="page-link" href="/?page=${boardPG.number -1}">Previous</a></li>
     - <li class="page-item ${boardPG.last ? "disabled" : ""}"><a class="page-link" href="/?page=${boardPG.number +1}">Next</a></li>
     - 현재 페이지를 이용해 이전, 다음 페이지를 구한다. 
     - previous와 Next 비활성화를 담당한다.
 
-8. findAll()
+4. findAll()
    - 리포지토리 테스트
-9. 실무적인 쿼리
+5. 실무적인 쿼리
    1. @ManyToOne만 사용
    2. 모든 것은 Lazy 전략
    3. Repo -> Test 쿼리 확인 (N+1 발생시) -> fetch Join
@@ -326,6 +328,12 @@ session.setAttribute("sessionUser", myUserDetails.getUser());
       1. select Account -> Join Fetch User (one 방향은 페치조인)
       2. select Transaction -> 총 2번 조회
       3. 즉 DTO(Account, TransactinList)으로 만들어서 스트림으로 처리
+6. 예외처리와 에러로그 구현
+   - ssr의 경우에는 자바스크립트로 리턴
+   - csr의 경우 DTO로 리턴하는데
+     - ssr은 두개로 나누어서 만들어둬야한다.
+     - 실제 화면단에서는 자바스크립트 알림으로 에러를 응답해야하므로
+7. EL표현식으로 화면에 렌더링
 
 ## N+1 해결방법
 1) 새로운 리포지토리에 필요할때마다 Join fetch로 만들어서 사용한다. -이너 조인이 발생 

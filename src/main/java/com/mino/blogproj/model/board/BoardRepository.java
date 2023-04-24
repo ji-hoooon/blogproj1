@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 
 public interface BoardRepository extends JpaRepository<Board, Long> {
@@ -23,5 +24,9 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     //인쿼리 수행하면 발생하는 쿼리
     @Query("select b from Board b where b.user.id in :userIds")
     List<Board> findByUserIds(@Param("userIds") List<Long> userIds);
+
+    //ManyToOne 관계이므로 조회2번보다 조인해서 1번 쿼리 발생시키는게 낫다.
+    @Query("select b from Board b join fetch b.user where b.id = :id")
+    Optional<Board> findByIdFetchUser(@Param("id") Long id);
 
 }

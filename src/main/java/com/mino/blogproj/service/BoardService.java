@@ -1,5 +1,6 @@
 package com.mino.blogproj.service;
 
+import com.mino.blogproj.core.exception.ssr.Exception400;
 import com.mino.blogproj.dto.board.BoardQueryRepository;
 import com.mino.blogproj.dto.board.BoardRequest;
 import com.mino.blogproj.dto.board.BoardRequest.SaveInDTO;
@@ -64,4 +65,34 @@ public class BoardService {
 //        });
 //        return boardsPGPS;
     }
+
+    public Board 게시글상세보기(Long id) {
+        //ManyToOne 관계이므로 조회2번보다 조인해서 1번 쿼리 발생시키는게 낫다.
+        Board boardPS = boardRepository.findByIdFetchUser(id).orElseThrow(
+                ()-> new Exception400("id", "게시글 아이디를 찾을 수 없습니다")
+        );
+        // 1. Lazy Loading 하는 것 보다 join fetch 하는 것이 좋다.
+        // 2. 왜 Lazy를 쓰냐면, 쓸데 없는 조인 쿼리를 줄이기 위해서이다.
+        // 3. 사실 @ManyToOne은 Eager 전략을 쓰는 것이 좋다.
+        // boardPS.getUser().getUsername();
+        return boardPS;
+    }
+//    public void subquery(){
+//        // 엄청난 긴 쿼리를 짤때는, 결국 QueryDSL 사용하는게 좋음
+//        String sql = "select id, title, content, (select count(id) from love) like_count, 1 n1,2 n2, 3 n3 from board where id = 1"; // 30줄
+//        Query query = em.createNativeQuery(sql);
+//        JpaResultMapper result = new JpaResultMapper();
+//        MyDTO myDTO = result.uniqueResult(query, MyDTO.class);
+//    }
+//
+//    public static class MyDTO {
+//        private int id;
+//        private String title;
+//        private String content;
+//        private int likeCount;
+//        private int n1;
+//        private int n2;
+//        private int n3;
+//    }
 }
+

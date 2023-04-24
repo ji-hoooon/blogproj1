@@ -14,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -57,5 +58,15 @@ public class BoardController {
         boardService.글쓰기(saveInDTO, myUserDetails.getUser().getId());
         return "redirect:/";
     }
+
+    //게시글 상세보기
+    @GetMapping( "/board/{id}")
+    public String detail(@PathVariable Long id, Model model){
+        Board board = boardService.게시글상세보기(id);
+        model.addAttribute("board", board);
+        return "board/detail";
+    }
+    //모델에 담아야지 EL 표현식으로 꺼낼 수 있다.
+    //: reqeust에도 담아도 된다. -> RequestDispatcher -> request 덮어쓰기 기술
 
 }
