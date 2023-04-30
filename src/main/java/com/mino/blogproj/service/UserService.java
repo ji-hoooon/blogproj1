@@ -1,5 +1,6 @@
 package com.mino.blogproj.service;
 
+import com.mino.blogproj.core.exception.csr.ExceptionApi400;
 import com.mino.blogproj.core.exception.ssr.Exception400;
 import com.mino.blogproj.core.exception.ssr.Exception500;
 import com.mino.blogproj.core.util.MyFileUtil;
@@ -12,6 +13,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -55,4 +58,12 @@ public class UserService {
             throw new Exception500("프로필 사진 등록 실패 : "+e.getMessage());
         }
     }//트랜잭션 종료로 인한 더티체킹 발생 -> 변경감지
+
+    //UserApiController에서 호출하는 메서드
+    public void 유저네임중복체크(String username) {
+        Optional<User> userOP = userRepository.findByUsername(username);
+        if(userOP.isPresent()){
+            throw new ExceptionApi400("username", "유저네임이 중복되었어요");
+        }
+    }
 }
