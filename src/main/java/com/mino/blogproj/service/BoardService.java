@@ -1,6 +1,7 @@
 package com.mino.blogproj.service;
 
 import com.mino.blogproj.core.exception.ssr.Exception400;
+import com.mino.blogproj.core.exception.ssr.Exception500;
 import com.mino.blogproj.core.util.MyParseUtil;
 import com.mino.blogproj.dto.board.BoardQueryRepository;
 import com.mino.blogproj.dto.board.BoardRequest;
@@ -39,21 +40,20 @@ public class BoardService {
         try{
             //1. 유저 존재 확인
             User userPS= userRepository.findById(userId).orElseThrow(
-                    () -> new RuntimeException("해당 유저가 존재하지 않습니다.")
+                    () -> new Exception400("id","해당 유저가 존재하지 않습니다.")
             );
-            //2. 썸네일 만들기그
 
-            String thumbnail= MyParseUtil.getThumbnail(saveInDTO.getContent());
+            //2. 썸네일 만들기
             log.debug("디버그 : "+saveInDTO.getContent());
-            System.out.println("디버그 : "+saveInDTO.getContent());
+            log.debug("디버그 : "+saveInDTO.getTitle());
+            String thumbnail= MyParseUtil.getThumbnail(saveInDTO.getContent());
 
             //3. 게시글 쓰기
             boardRepository.save(saveInDTO.toEntity(userPS, thumbnail));
 
         }catch (Exception e){
-            throw new RuntimeException("글쓰기 실패 : "+e.getMessage());
+            throw new Exception500("글쓰기 실패 : "+e.getMessage());
         }
-
     }
 
     @Transactional(readOnly = true)

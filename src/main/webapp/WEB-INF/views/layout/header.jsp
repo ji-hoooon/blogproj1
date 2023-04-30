@@ -56,7 +56,7 @@
             <%--  사용자 정보 노출 --%>
             <c:if test="${sessionUser != null}">
                 <div>
-                    <a href="/user/profileUpdate"><img src="/images/profile.jfif" style="width: 35px;"
+                    <a href="/s/user/${sessionUser.id}/updateProfileForm"><img src="/upload/${sessionUser.profile}" style="width: 35px;"
                                                        class="rounded-circle" alt="Cinque Terre"></a>
                 </div>
             </c:if>

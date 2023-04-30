@@ -62,6 +62,7 @@ public class BoardController {
     }
     @PostMapping("/s/board/save")
     public String save(BoardRequest.SaveInDTO saveInDTO, @AuthenticationPrincipal MyUserDetails myUserDetails){
+        log.debug("디버그 : "+myUserDetails.getUser().getId());
         boardService.글쓰기(saveInDTO, myUserDetails.getUser().getId());
         return "redirect:/";
     }

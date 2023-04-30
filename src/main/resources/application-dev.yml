@@ -31,10 +31,18 @@ spring:
   output:
     ansi:
       enabled: always # vscode console color
+#  프로필 사진 최대 크기 설정
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      enabled: true
 logging:
   level:
-    '[com.mino.blogporj]': DEBUG
+    '[com.mino.blogproj]': DEBUG
     '[org.hibernate.type]': TRACE
     # 개발은 trace
     # trace -> debug -> info -> warn -> error
     # 개발시에만 TRACE
+
+file:
+  path: ./upload/

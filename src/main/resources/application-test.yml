@@ -38,3 +38,6 @@ logging:
     # 개발은 trace
     # trace -> debug -> info -> warn -> error
     # 개발시에만 TRACE
+
+#file:
+#  path: /home/a

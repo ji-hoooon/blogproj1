@@ -335,41 +335,236 @@ session.setAttribute("sessionUser", myUserDetails.getUser());
      - 실제 화면단에서는 자바스크립트 알림으로 에러를 응답해야하므로
 7. EL표현식으로 화면에 렌더링
 
+#### Day 4
+- summernote는 png만 지원한다. -> jpg일 경우 null 터짐
+1. 프로필 사진 추가 
+2. 
+
+#### 프로필 사진 추가
+1. 헤더의 로그인 사용자 정보 변경
+   - 기본 프로필 사진으로 설정
+   - 경로는 /upload/profile.png
+   - 하지만, 실행환경에서는 static폴더에서 찾기 때문에, /static/upload 폴더는 존재하지 않는다.
+   - 리소스 핸들러를 이용해 해당 위치를 찾아갈 수 있도록 WebMvcConfig 설정 클래스를 작성한다.
+   - WebMvcConfig 클래스를 구현해서 할 수 있는 대표적인 설정
+     1. 인터셉터 등록: addInterceptors 메소드를 구현하여 인터셉터를 등록할 수 있습니다. 예를 들어, 인증 정보가 있는지 확인하거나 권한 검사를 수행하는 인터셉터를 등록할 수 있습니다.
+     2. 리소스 핸들러 등록: addResourceHandlers 메소드를 구현하여 정적 리소스를 처리하는 핸들러를 등록할 수 있습니다. 예를 들어, CSS, JavaScript 및 이미지 파일과 같은 정적 파일을 처리하는 핸들러를 등록할 수 있습니다. 
+     3. 비밀번호 인코더 설정: configurePathMatchers 메소드를 구현하여 비밀번호 인코더를 설정할 수 있습니다. 예를 들어, BCryptPasswordEncoder를 사용하여 비밀번호를 인코딩하도록 설정할 수 있습니다. 
+     4. 예외 처리기 등록: configureHandlerExceptionResolvers 메소드를 구현하여 예외 처리기를 등록할 수 있습니다. 예를 들어, 사용자가 권한이 없는 페이지에 액세스하려고 시도 할 때 보여줄 예외 처리기를 등록할 수 있습니다.
+     5. 로그인 페이지 설정: configureDefaultServletHandling 메소드를 구현하여 로그인 페이지를 설정할 수 있습니다. 예를 들어, 로그인 폼을 사용자 지정 JSP 페이지로 구성할 수 있습니다. 
+     6. 보안 HTTP 헤더 설정: configureContentNegotiation 메소드를 구현하여 보안 HTTP 헤더를 설정할 수 있습니다. 예를 들어, X-Frame-Options, X-XSS-Protection 및 X-Content-Type-Options와 같은 헤더를 설정할 수 있습니다.
+2. WebMvcConfig에 리소스 핸들러 등록
+```java
+package com.mino.blogproj.config;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.resource.PathResourceResolver;
+
+@Configuration
+public class WebMvcConfig implements WebMvcConfigurer {
+
+    // CORS
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        WebMvcConfigurer.super.addResourceHandlers(registry);
+
+        // 1. 절대경로 file:///c:/upload/
+        // 2. 상대경로 file:./upload/
+        registry
+                .addResourceHandler("/upload/**")
+                .addResourceLocations("file:" + "./upload/")
+                .setCachePeriod(60 * 60) // 초 단위 => 한시간
+                .resourceChain(true)
+                .addResolver(new PathResourceResolver());
+    }
+}
+```
+- @Configuration 어노테이션은 해당 클래스가 스프링 설정 클래스임을 나타냅니다.
+- WebMvcConfigurer 인터페이스를 구현하여 addResourceHandlers 메소드를 구현합니다. 이 메소드는 정적 파일 요청을 처리할 때 사용됩니다. 
+- registry.addResourceHandler("/upload/**")는 "/upload"로 시작하는 요청을 처리하기 위해 Handler를 등록합니다. 
+- addResourceLocations 메소드는 실제 파일이 저장된 경로를 설정합니다. 여기서는 "./upload/" 폴더를 사용합니다. 
+- setCachePeriod 메소드는 클라이언트 캐시 지속 시간을 설정합니다. 이 경우, 1시간(60*60) 동안 클라이언트 캐시가 유지됩니다. 
+- resourceChain 메소드는 리소스 체인을 활성화합니다. 이 옵션을 활성화하면, 정적 파일 요청이 들어왔을 때 다양한 리소스 변형과 미리 캐싱된 리소스를 적용하는 것이 가능합니다. 
+- addResolver 메소드는 정적 리소스 경로에 대한 정보를 해석하는 리졸버를 등록합니다. PathResourceResolver는 URI를 파일 경로로 변환하는 데 사용됩니다.
+3. 각각 로그인한 사용자의 정보를 가져오기 위해서 저장해둔 세션의 sessionUser 데이터를 가져온다.
+```html
+<a href="/s/user/${sessionUser.id}/updateProfileForm"><img src="/upload/person.png" style="width: 35px;"
+                                                       class="rounded-circle" alt="Cinque Terre"></a>
+```
+   - 템플릿 엔진에서 EL표현식으로 로그인한 사용자정보를 사용하기 위해서 로그인 완료시 sessionUser정보를 저장해놨다.
+   - 왜냐하면 화면단에서는 securityContextHolder에 접근을 못하고 Page, Request, Session, Application만 접근 가능
+4. 사진 파일인지 체크하고, 사진 업로드가 완료되면 사진을 보여주고 완료 클릭시, 업로드된 사진으로 변경을 form에 요청하는 자바스크립트
+```javascript
+    function chooseImage(obj){
+        //console.log(obj);
+        //console.log(obj.files);
+        let f  = obj.files[0];
+        if(!f.type.match("image.*")){
+            alert("이미지를 등록해야 합니다.");
+            return;
+        }
+        let reader = new FileReader();
+        reader.readAsDataURL(f);
+        // 콜스택이 다 비워지고, 이벤트 루프로 가서 readAsDataURL 이벤트가 끝나면 콜백시켜주는 함수
+        reader.onload = function (e){
+            console.log(e);
+            console.log(e.target.result);
+            $("#imagePreview").attr("src", e.target.result);
+        }
+    }
+```
+5. 자바스크립트로부터 받은 사진 변경 요청을 처리하는 form
+```html
+<div class="container my-3">
+    <h2 class="text-center">프로필 사진 변경 페이지</h2>
+<%--  모델에 user 정보를 넘겨줘야하고, enctype은 사진 전송 타입인 multipart로 보낸다.--%>
+    <form action="/s/user/${user.id}/updateProfile" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+<%--            <img src="/images/dora.png" alt="Current Photo" class="img-fluid" id="imagePreview">--%>
+            <img src="/upload/${user.profile}" alt="Current Photo" class="img-fluid" id="imagePreview">
+<%--            리졸브 핸들러가 /upload 경로를 변경해준다.--%>
+        </div>
+        <div class="form-group">
+            <input type="file" class="form-control" id="profile" name="profile" onchange="chooseImage(this)">
+        </div>
+        <button type="submit" class="btn btn-primary">사진변경</button>
+    </form>
+</div>
+```
+6. 유저 정보를 DB에서 조회해서 모델에 전달한다.
+```java
+        User userPS = userService.회원프로필보기(id);
+        model.addAttribute("user", userPS);
+        return "user/profileUpdateForm";
+```
+7. 프로필 사진 업데이트하는 핸들러 메서드 작성 - 수정한 사진 등록 후에는, 반드시 세션 동기화 필수 
+```java
+	@PostMapping("/s/user/{id}/updateProfile")
+	    public String profileUpdate(
+	            @PathVariable Long id,
+	            MultipartFile profile,
+	            @AuthenticationPrincipal MyUserDetails myUserDetails
+	            ){
+	        // 1. 권한 체크
+	        if(id != myUserDetails.getUser().getId()){
+	            throw new Exception403("권한이 없습니다");
+	        }
+	
+	        // 2. 사진 파일 유효성 검사
+	        if(profile.isEmpty()){
+	            throw new Exception400("profile", "사진이 전송되지 않았습니다");
+	        }
+	
+	        // 3. 사진을 파일에 저장하고 그 경로를 DB에 저장
+	        User userPS = userService.프로필사진수정(profile, id);
+	
+	        // 4. 세션 동기화
+	        myUserDetails.setUser(userPS);
+	        session.setAttribute("sessionUser", userPS);
+	
+	        return "redirect:/";
+	    }
+```
+- multipart/form-data로 보낸 file은 MultipartFile 타입이 된다.
+- 사진을 Base64로 변환해서 DB에 저장하지 않고, 프로필 사진을 파일에 저장하고 그 경로를 DB에 저장한다.
+8. 프로필 사진 수정하는 메서드
+```java
+	@Transactional
+	    public User 프로필사진수정(MultipartFile profile, Long id) {
+	        try {
+	            String uuidImageName = MyFileUtil.write(uploadFolder, profile);
+	            User userPS = userRepository.findById(id)
+	                    .orElseThrow(()->new Exception500("로그인 된 유저가 DB에 존재하지 않음"));
+	            userPS.changeProfile(uuidImageName);
+	            return userPS;
+	        }catch (Exception e){
+	            throw new Exception500("프로필 사진 등록 실패 : "+e.getMessage());
+	        }
+	    }
+```
+9. 파일을 저장하는 유틸 클래스 작성 - 파일과 파일 저장 경로를 파라미터로 받는다.
+```java
+    @Value("${file.path}")
+    private String uploadFolder;
+
+	public static String write(String uploadFolder, MultipartFile file) {
+	        UUID uuid = UUID.randomUUID();
+	        String originalFilename = file.getOriginalFilename();
+	        String uuidFilename = uuid + "_" + originalFilename;
+	        try {
+	            Path filePath = Paths.get(uploadFolder + uuidFilename);
+	            Files.write(filePath, file.getBytes());
+	        } catch (Exception e) {
+	            throw new Exception500("파일 업로드 실패 : "+e.getMessage());
+	        }
+	        return uuidFilename;
+	    }
+```
+- 파일 저장시에 이름 충돌을 방지하기 위해 해당 시간+랜덤값을 전달하는 롤링 기법 사용
+- 유효아이디(UUID) 사용해서 이름 충돌을 방지한다.
+- DB에는 사진의 이름만 저장하고, 서버에 파일을 저장
+10. 프로퍼티 설정에 최대 파일 크기 설정
+```yaml
+	servlet:
+	    multipart:
+	      max-file-size: 10MB
+	      enabled: true
+```
+
+
+
+## 개발환경과 실행환경
+1. 프로젝트 작업환경에서 deploy를 실행하면 실행파일이 생성 (jar/war)
+2. 해당 실행파일을 그대로 실서버에 배포할 수는 없다. (개발환경과 실행환경이 다르기 때문에)
+3. github을 이용해 CI를 수행한다. (지속적인 통합)
+4. 배포를 하기전에, 테스트 서버에서 테스트를 수행하고, 빌드한다.
+   1. OS 설치
+   2. JDK 설치
+   3. Junit 테스트
+   4. Build
+5. OS마다 경로의 차이
+   1. 윈도우의 경로 : C:\Users\user\Documents\example.txt
+   2. 리눅스/맥의 경로 : /home/user/Documents/example.txt
+      - 리눅스와 맥은 Unix 계열의 운영체제이므로 경로 구분자로 슬래시 (/)를 사용합니다. 반면, 윈도우는 DOS 계열의 운영체제이므로 역슬래시()를 사용합니다. 
+      - 윈도우에서는 드라이브 이름이 경로에 포함되어 있어, 드라이브의 루트 디렉토리로부터의 상대 경로를 사용할 수도 있습니다.
+6. 따라서 개발 환경, 테스트 환경, 개발 환경일 때 각각 사용할 경로를 프로퍼티로 설정해준다.
+```yaml
+file:
+  path: ./upload/
+```
+
 ## N+1 해결방법
-1) 새로운 리포지토리에 필요할때마다 Join fetch로 만들어서 사용한다. -이너 조인이 발생 
+1) 새로운 리포지토리에 필요할때마다 Join fetch로 만들어서 사용한다. -이너 조인이 발생
 2) @EntityGraph 이용 - leftOuterJoin이 발생하므로 좋지는 않다.
 3) batch size 설정
 
- 여러가지 방법의 장단점
+여러가지 방법의 장단점
 : Join fetch, @EntityGraph, batch size는 모두 Hibernate의 성능 최적화를 위한 기능으로, 각각의 특징과 적용 방법을 고려하여 사용해야 합니다.
 
 1. Join fetch
 - Join fetch는 JPQL에서 사용하는 기능으로, 연관된 엔티티를 한 번에 조회할 수 있도록 지원합니다.
 - 이를 통해 n+1 문제를 해결할 수 있으며, 연관된 엔티티를 지연로딩하지 않고 즉시 로딩하여 조회합니다
-  - 사용하기 쉽고 간단하게 적용할 수 있습니다.
-  - 쿼리 결과를 즉시 로딩하기 때문에, 연관된 엔티티 수가 많을 경우 메모리 부족이 발생할 수 있습니다.
-  - 복잡한 쿼리를 작성할 경우 성능이 저하될 수 있습니다.
-  - 따라서, Join fetch는 간단한 쿼리에서 적용하기 적합하며, 연관된 엔티티 수가 적을 때 성능 최적화에 효과적입니다.
+    - 사용하기 쉽고 간단하게 적용할 수 있습니다.
+    - 쿼리 결과를 즉시 로딩하기 때문에, 연관된 엔티티 수가 많을 경우 메모리 부족이 발생할 수 있습니다.
+    - 복잡한 쿼리를 작성할 경우 성능이 저하될 수 있습니다.
+    - 따라서, Join fetch는 간단한 쿼리에서 적용하기 적합하며, 연관된 엔티티 수가 적을 때 성능 최적화에 효과적입니다.
 
 2. @EntityGraph
 - @EntityGraph는 Hibernate 5.1 이상부터 지원하는 기능으로, 연관된 엔티티를 즉시 로딩하면서도, 메모리를 효율적으로 사용할 수 있도록 지원합니다.
-   - 연관된 엔티티를 즉시 로딩하면서도 메모리를 효율적으로 사용할 수 있습니다. 
-   - 복잡한 쿼리에서도 성능이 유지됩니다. 
-   - @EntityGraph를 적용할 때, join fetch보다 더욱 세밀한 조정이 가능합니다. 
-   - 하지만, @EntityGraph는 애플리케이션에서 사용하는 엔티티에 대해 개발자가 직접 정의해주어야 하기 때문에, 사용하기에는 조금 더 복잡합니다.
+    - 연관된 엔티티를 즉시 로딩하면서도 메모리를 효율적으로 사용할 수 있습니다.
+    - 복잡한 쿼리에서도 성능이 유지됩니다.
+    - @EntityGraph를 적용할 때, join fetch보다 더욱 세밀한 조정이 가능합니다.
+    - 하지만, @EntityGraph는 애플리케이션에서 사용하는 엔티티에 대해 개발자가 직접 정의해주어야 하기 때문에, 사용하기에는 조금 더 복잡합니다.
 
 3. Batch size
-- Batch size는 Hibernate의 Batch Fetching 기능 중 하나로, 여러 엔티티를 한 번에 가져와 메모리 소비를 줄이고 성능을 향상시키는 방법입니다. 
-  - 여러 엔티티를 한 번에 조회하여 메모리 소비를 줄일 수 있습니다.
-  - Join fetch와 달리, 복잡한 쿼리에서도 성능이 유지됩니다.
-  - Batch size를 적용하려면, 엔티티 클래스의 @OneToMany 또는 @ManyToMany 어노테이션에 @BatchSize 어노테이션을 추가하여 사용합니다.
-  - Batch size는 간단한 쿼리에서 사용하기 적합하며, 연관된 엔티티 수가 많을 때 성능 최적화에 효과적입니다.
-  - 하지만 Batch size는 연관된 엔티티를 한 번에 조회하므로, 엔티티의 수가 많으면 메모리 사용량이 늘어나 성능에 오히려 악영향을 미칠 수 있습니다.
-
-
-
-
-
+- Batch size는 Hibernate의 Batch Fetching 기능 중 하나로, 여러 엔티티를 한 번에 가져와 메모리 소비를 줄이고 성능을 향상시키는 방법입니다.
+    - 여러 엔티티를 한 번에 조회하여 메모리 소비를 줄일 수 있습니다.
+    - Join fetch와 달리, 복잡한 쿼리에서도 성능이 유지됩니다.
+    - Batch size를 적용하려면, 엔티티 클래스의 @OneToMany 또는 @ManyToMany 어노테이션에 @BatchSize 어노테이션을 추가하여 사용합니다.
+    - Batch size는 간단한 쿼리에서 사용하기 적합하며, 연관된 엔티티 수가 많을 때 성능 최적화에 효과적입니다.
+    - 하지만 Batch size는 연관된 엔티티를 한 번에 조회하므로, 엔티티의 수가 많으면 메모리 사용량이 늘어나 성능에 오히려 악영향을 미칠 수 있습니다.
 
 
 ## 코드 설계시 고민한 점
@@ -415,3 +610,5 @@ session.setAttribute("sessionUser", myUserDetails.getUser());
     - 메모리 사용량 증가: OSIV를 사용하면, 영속성 컨텍스트가 계속해서 유지되므로 메모리 사용량이 증가할 수 있습니다.
     - 성능 저하: OSIV를 사용하면, 영속성 컨텍스트가 계속해서 유지되므로 성능이 저하될 수 있습니다.
     - 데이터 불일치 가능성: OSIV를 사용하면, 영속성 컨텍스트가 오랜 시간 동안 유지될 경우, 데이터 불일치 문제가 발생할 수 있습니다.
+5. Summernote에서 사진만 넣으면 null을 반환한다.
+   - png파일만 인식하기 때문에, jpg파일을 업로드하면 null을 반환한다.

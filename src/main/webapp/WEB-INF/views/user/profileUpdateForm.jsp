@@ -40,9 +40,12 @@
 
 <div class="container my-3">
     <h2 class="text-center">프로필 사진 변경 페이지</h2>
-    <form>
+<%--  모델에 user 정보를 넘겨줘야하고, enctype은 사진 전송 타입인 multipart로 보낸다.--%>
+    <form action="/s/user/${user.id}/updateProfile" method="post" enctype="multipart/form-data">
         <div class="form-group">
-            <img src="/images/dora.png" alt="Current Photo" class="img-fluid" id="imagePreview">
+<%--            <img src="/images/dora.png" alt="Current Photo" class="img-fluid" id="imagePreview">--%>
+            <img src="/upload/${user.profile}" alt="Current Photo" class="img-fluid" id="imagePreview">
+<%--            리졸브 핸들러가 /upload 경로를 변경해준다.--%>
         </div>
         <div class="form-group">
             <input type="file" class="form-control" id="profile" name="profile" onchange="chooseImage(this)">

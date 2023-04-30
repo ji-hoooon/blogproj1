@@ -27,12 +27,12 @@
                 <%-- 글 아이템 끝 --%>
             </c:forEach>
         </div>
-        <ul class="pagination mt-3 d-flex justify-content-center">
-            <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
-            <li class="page-item"><a class="page-link" href="#">Next</a></li>
-        </ul>
-    </div>
-    <%@ include file="../layout/footer.jsp" %>
+<%--        <ul class="pagination mt-3 d-flex justify-content-center">--%>
+<%--            <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>--%>
+<%--            <li class="page-item"><a class="page-link" href="#">Next</a></li>--%>
+<%--        </ul>--%>
+<%--    </div>--%>
+<%--    <%@ include file="../layout/footer.jsp" %>--%>
 <%--        &lt;%&ndash; 글 아이템 시작 &ndash;%&gt;--%>
 <%--        <div class="card col-lg-3 pt-2">--%>
 <%--            <img class="card-img-top" style="height: 250px;" src="/images/dora.png" alt="Card image">--%>
@@ -81,7 +81,7 @@
 <%--        </div>--%>
 <%--        &lt;%&ndash; 글 아이템 끝 &ndash;%&gt;--%>
 
-    </div>
+<%--    </div>--%>
 
     <ul class="pagination mt-3 d-flex justify-content-center">
 <%--        <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>--%>
