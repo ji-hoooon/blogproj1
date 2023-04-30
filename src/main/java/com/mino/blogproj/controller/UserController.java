@@ -9,6 +9,7 @@ import com.mino.blogproj.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +20,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
+//서비스에
+@Transactional(readOnly = true)
 @Controller
 @RequiredArgsConstructor
 public class UserController {
@@ -90,5 +93,19 @@ public class UserController {
         session.setAttribute("sessionUser", userPS);
 
         return "redirect:/";
+    }
+
+    //유저 상세보기
+    //: 회원 수정 가능한 페이지 전달
+    @GetMapping("/s/user/{id}/updateForm")
+    public String updateForm(@PathVariable Long id, Model model, @AuthenticationPrincipal MyUserDetails myUserDetails) {
+        // 1. 권한 체크
+        if(id != myUserDetails.getUser().getId()){
+            throw new Exception403("권한이 없습니다");
+        }
+        // 2. 회원 정보 조회
+        User userPS = userService.회원정보보기(id);
+        model.addAttribute("user", userPS);
+        return "user/updateForm";
     }
 }
