@@ -10,12 +10,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 
 @Controller
 @RequiredArgsConstructor
@@ -30,7 +32,7 @@ public class UserController {
     //write (post) : /리소스/식별자/(pk, uk) save or delete or update
     //read  (get)  : /리소스/식별자
     @PostMapping("/join")
-    public String join(UserRequest.JoinInDTO joinInDTO){    //x-www-form-urlencoded
+    public String join(@Valid UserRequest.JoinInDTO joinInDTO, Errors errors){    //x-www-form-urlencoded
         //모든 로직을 서비스에게 위임한다.
 
         userService.회원가입(joinInDTO);
@@ -51,7 +53,7 @@ public class UserController {
     //모든 뷰를 반환은 ViewResolver로 간다.
 
     //profileUpdateForm
-    //프로필 업데이트하기
+    //프로필 업데이트하기:
     @GetMapping("/s/user/{id}/updateProfileForm")
     public String profileUpdateForm(@PathVariable Long id, Model model, @AuthenticationPrincipal MyUserDetails myUserDetails){
         // 1. 권한 체크

@@ -31,4 +31,18 @@ public class BoardQueryRepository {
         return new PageImpl<>(boardListPS, PageRequest.of(page, SIZE), totalCount);
         //사이즈 개수는 토탈 사이즈가 필요
     }
+
+    //User를 join fetch를 이용해 조인하고, LIKE 연산자로 keyword 검색하는 findAll
+    public Page<Board> findAllByKeyword(int page, String keyword) {
+        int startPosition = page*SIZE;
+        List<Board> boardListPS = em.createQuery("select b from Board b join fetch b.user where b.title like :keyword order by b.id desc")
+                .setParameter("keyword", "%" + keyword + "%")
+                .setFirstResult(startPosition) // startPosition
+                .setMaxResults(SIZE) // size
+                .getResultList();
+        Long totalCount = em.createQuery("select count(b) from Board b where b.title like :keyword", Long.class)
+                .setParameter("keyword", "%" + keyword + "%")
+                .getSingleResult();
+        return new PageImpl<>(boardListPS, PageRequest.of(page, SIZE), totalCount);
+    }
 }

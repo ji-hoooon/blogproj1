@@ -34,7 +34,6 @@
 #### 요구사항 2단계
 - 아이디 중복확인 (중복확인후 아이디 변경시 다시 중복체크 요구)
 - 비밀번호 동일체크
-- 로그인 아이디 기억하기
 - 프론트 유효성 검사 (onsubmit)
 - 백엔드 유효성 검사 (AOP 등록)
 - 글로벌 Exception 처리
@@ -43,10 +42,13 @@
 - 회원 프로필 사진 등록
 - 회원정보 보기
 - 회원정보 수정
-- 에러 로그 테이블 관리
+
 #### 요구사항 4단계
 - 검색
+
 #### 요구사항 5단계
+- 로그인 아이디 기억하기 (쿠키)
+- 에러 로그 테이블 관리
 - Love 테이블 생성
 - Reply 테이블 생성
 - 연관관계 설정
@@ -54,8 +56,6 @@
 - 댓글삭제
 - 좋아요 하기
 - 좋아요 보기
-- 남은 기능 추가하기
--  보완하고 싶은것 추가하기
 
 
 #### Day 1
@@ -550,8 +550,28 @@ file:
    2. 다른 응답코드를 받으면 사용할 수 없다고 실패
 6. JSON을 리턴받는 UserApiController 작성
 
-#### 아이디 중복확인
-1. 
+#### 백엔드 유효성 검사
+- Validation API
+1. DTO에 @NotEmpty 설정
+2. 컨트롤러에 @Valid, Errors 설정
+3. MyValidationAdvice가 유효성검사를 AOP로 수행
+   - POST 메서드와 ViewResolver를 사용할 경우에 발생
+
+#### 검색
+1. Search 폼 추가
+2. Search action에 get 요청 그리고 keyword를 쿼리스트링으로 받는다.
+   - 파라미터 전달방식인 Body, QueryString, PathVariable
+     1. Body는 POST, PUT 메서드에서만 존재하고, Content-Type을 통해 지정한다.
+     2. Content-Type을 명시하지 않을 경우 기본값은 x-www-form-urlencoded 형식
+     3. PathVariable의 경우 PK,FK와 같이 리소스의 고유성과 직접적인 관련이 있는 값들에 대해 사용
+     4. 그외에는 QueryString으로 게시물을 검색하는 기능에서 검색 조건을 전달할 때 사용
+     4. 만약 요청 바디 / 응답 바디의 형식이 다를 때
+        1. consumes 속성은 클라이언트가 서버로 전송하는 데이터의 타입
+        2. produces 속성은 서버가 클라이언트에게 전송하는 데이터의 타입
+3. 게시판 컨트롤러의 main 메서드에서 기본값을 전달하므로, @RequestParam 사용
+4. 페이징에도 검색 조건을 적용
+   1. 검색이 포함된  페이지에서 model.addAttribute("keyword", keyword); -> DTO로는 한방 DTO로 전달 필요
+   2. JSP에서 제공하는 param 기본 객체을 이용해 파라미터에 접근해서 검색 조건을 추가
 
 ## N+1 해결방법
 1) 새로운 리포지토리에 필요할때마다 Join fetch로 만들어서 사용한다. -이너 조인이 발생

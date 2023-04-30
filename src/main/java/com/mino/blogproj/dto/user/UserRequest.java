@@ -4,13 +4,18 @@ import com.mino.blogproj.model.user.User;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotEmpty;
+
 public class UserRequest {
 
     @Getter
     @Setter
     public static class JoinInDTO{
+        @NotEmpty
         private String username;
+        @NotEmpty
         private String password;
+        @NotEmpty
         private String email;
 
         //DTO -> Entity 변환을 위한 메서드 작성
