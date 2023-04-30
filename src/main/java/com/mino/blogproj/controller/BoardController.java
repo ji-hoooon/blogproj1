@@ -84,4 +84,13 @@ public class BoardController {
     //모델에 담아야지 EL 표현식으로 꺼낼 수 있다.
     //: reqeust에도 담아도 된다. -> RequestDispatcher -> request 덮어쓰기 기술
 
+
+    //게시글 삭제
+    //: PK, UK이기 때문에 -> PathVariable
+    @PostMapping("/s/board/{id}/delete")
+    public String delete(@PathVariable Long id, @AuthenticationPrincipal MyUserDetails myUserDetails) {
+        //소유자 확인은 서비스에서 수행하도록 해야한다.
+        boardService.게시글삭제(id, myUserDetails.getUser().getId());
+        return "redirect:/";
+    }
 }

@@ -4,14 +4,22 @@
 
 
 <div class="container my-3">
-    <div class="mb-3 d-flex">
-        <a href="/board/1/updateForm" class="btn btn-warning">수정</a>
-        <form>
-            <input type="hidden" name="id" />
-            <button class="btn btn-danger">삭제</button>
-        </form>
-    </div>
-
+    <%--    <div class="mb-3 d-flex">--%>
+    <%--        <a href="/board/1/updateForm" class="btn btn-warning">수정</a>--%>
+    <%--        <form>--%>
+    <%--            <input type="hidden" name="id" />--%>
+    <%--            <button class="btn btn-danger">삭제</button>--%>
+    <%--        </form>--%>
+    <%--    </div>--%>
+    <%--    게시물 소유자일 경우에만, 수정 삭제 버튼이 보이도록--%>
+    <c:if test="${sessionUser.id == board.user.id}">
+        <div class="mb-3 d-flex">
+            <a href="/s/board/${board.id}/updateForm" class="btn btn-warning">수정</a>
+            <form action="/s/board/${board.id}/delete" method="post">
+                <button class="btn btn-danger">삭제</button>
+            </form>
+        </div>
+    </c:if>
 
     <div class="mb-2 d-flex justify-content-end">
         글 번호 :

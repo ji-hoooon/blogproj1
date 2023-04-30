@@ -40,13 +40,15 @@
 - Script 응답 설정
 #### 요구사항 3단계
 - 회원 프로필 사진 등록
+- 검색
+
+#### 요구사항 4단계
+- 게시물 삭제
 - 회원정보 보기
 - 회원정보 수정
 
-#### 요구사항 4단계
-- 검색
-
 #### 요구사항 5단계
+- 게시물 수정
 - 로그인 아이디 기억하기 (쿠키)
 - 에러 로그 테이블 관리
 - Love 테이블 생성
@@ -572,6 +574,28 @@ file:
 4. 페이징에도 검색 조건을 적용
    1. 검색이 포함된  페이지에서 model.addAttribute("keyword", keyword); -> DTO로는 한방 DTO로 전달 필요
    2. JSP에서 제공하는 param 기본 객체을 이용해 파라미터에 접근해서 검색 조건을 추가
+
+#### 게시물 삭제 / 수정
+1. 화면단에서 구현
+   - 게시글 소유자만 삭제, 수정 버튼이 보이도록 설정
+   ```html
+       <%--    게시물 소유자일 경우에만, 수정 삭제 버튼이 보이도록--%>
+    <c:if test="${sessionUser.id == board.user.id}">
+        <div class="mb-3 d-flex">
+            <a href="/s/board/${board.id}/updateForm" class="btn btn-warning">수정</a>
+            <form action="/s/board/${board.id}/delete" method="post">
+                <button class="btn btn-danger">삭제</button>
+            </form>
+        </div>
+    </c:if>
+   ```
+2. 서버단에서 구현
+   - 로그인한 유저가 게시글 소유자 인지 확인
+   - 해당 게시글이 존재하는지 확인하게 하기 위해서 서비스 메서드에게 로그인한 유저id를 함께 전달
+   ```java
+   
+
+   ```
 
 ## N+1 해결방법
 1) 새로운 리포지토리에 필요할때마다 Join fetch로 만들어서 사용한다. -이너 조인이 발생

@@ -1,6 +1,7 @@
 package com.mino.blogproj.service;
 
 import com.mino.blogproj.core.exception.ssr.Exception400;
+import com.mino.blogproj.core.exception.ssr.Exception403;
 import com.mino.blogproj.core.exception.ssr.Exception500;
 import com.mino.blogproj.core.util.MyParseUtil;
 import com.mino.blogproj.dto.board.BoardQueryRepository;
@@ -97,6 +98,23 @@ public class BoardService {
         // 3. 사실 @ManyToOne은 Eager 전략을 쓰는 것이 좋다.
         // boardPS.getUser().getUsername();
         return boardPS;
+    }
+    @Transactional
+    public void 게시글삭제(Long id, Long userId) {
+        //1. 게시물 조회
+        Board boardPS = boardRepository.findByIdFetchUser(id).orElseThrow(
+                ()-> new Exception400("id", "게시글 아이디를 찾을 수 없습니다")
+        );
+        try {
+            //2. 게시글의 유저와 로그인한 유저 동일 유무 확인
+            if(boardPS.getUser().getId() != userId){
+                throw new Exception403("권한이 없습니다");
+            }
+            //3. 삭제 수행
+            boardRepository.delete(boardPS);
+        }catch (Exception e){
+            throw new Exception500("게시글 삭제 실패 : "+e.getMessage());
+        }
     }
 //    public void subquery(){
 //        // 엄청난 긴 쿼리를 짤때는, 결국 QueryDSL 사용하는게 좋음
