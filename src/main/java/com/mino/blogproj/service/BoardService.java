@@ -7,6 +7,7 @@ import com.mino.blogproj.core.util.MyParseUtil;
 import com.mino.blogproj.dto.board.BoardQueryRepository;
 import com.mino.blogproj.dto.board.BoardRequest;
 import com.mino.blogproj.dto.board.BoardRequest.SaveInDTO;
+import com.mino.blogproj.dto.board.BoardRequest.UpdateInDTO;
 import com.mino.blogproj.model.board.Board;
 import com.mino.blogproj.model.board.BoardRepository;
 import com.mino.blogproj.model.user.User;
@@ -116,6 +117,40 @@ public class BoardService {
             throw new Exception500("게시글 삭제 실패 : "+e.getMessage());
         }
     }
+    @Transactional
+    public Board 게시글수정(Long id,BoardRequest.UpdateInDTO updateInDTO, Long userId){
+        //1. 게시물 조회
+        Board boardPS = boardRepository.findByIdFetchUser(id).orElseThrow(
+                ()-> new Exception400("id", "게시글 아이디를 찾을 수 없습니다")
+        );
+        try {
+            //2. 게시글의 유저와 로그인한 유저 동일 유무 확인
+            if(boardPS.getUser().getId() != userId){
+                throw new Exception403("권한이 없습니다");
+            }
+            //3. 썸네일 만들기
+            String thumbnail= MyParseUtil.getThumbnail(updateInDTO.getContent());
+
+            //4. 수정 수행
+            return boardRepository.save(updateInDTO.toEntity(boardPS.getUser(), thumbnail));
+        }catch (Exception e){
+            throw new Exception500("게시글 수정 실패 : "+e.getMessage());
+        }
+    }
+
+    public Board 게시글수정보기(Long id, Long userId) {
+        //1. 게시물 존재 확인
+        Board boardPS = boardRepository.findByIdFetchUser(id).orElseThrow(
+                ()-> new Exception400("id", "게시글 아이디를 찾을 수 없습니다")
+        );
+        //2. 게시글의 유저와 로그인한 유저 동일 유무 확인
+        if(boardPS.getUser().getId() != userId){
+            throw new Exception403("권한이 없습니다");
+        }
+        return boardPS;
+    }
+
+
 //    public void subquery(){
 //        // 엄청난 긴 쿼리를 짤때는, 결국 QueryDSL 사용하는게 좋음
 //        String sql = "select id, title, content, (select count(id) from love) like_count, 1 n1,2 n2, 3 n3 from board where id = 1"; // 30줄

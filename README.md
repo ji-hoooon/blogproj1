@@ -99,13 +99,11 @@
 ### Day 2
 
 #### URI 코드 컨벤션
-
-//URI 컨벤션
-// 인증이 되지 않은 상태에서 인증과 관련된 주소는 엔티티를 적지 않는다.
-// 행위: /리소스/식별자
-// POST 메서드로 DELETE, UPDATE, INSERT 모두 사용
-//write (post) : /리소스/식별자/(pk, uk) save or delete or update
-//read  (get)  : /리소스/식별자
+- 인증이 되지 않은 상태에서 인증과 관련된 주소는 엔티티를 적지 않는다.
+- 행위: /리소스/식별자
+- POST 메서드로 DELETE, UPDATE, INSERT 모두 사용 
+  - write (post) : /리소스/식별자/(pk, uk) save or delete or update 
+  - read  (get)  : /리소스/식별자
 
 ### 대주제
 

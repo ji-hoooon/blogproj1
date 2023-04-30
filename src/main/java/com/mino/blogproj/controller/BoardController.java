@@ -7,17 +7,21 @@ import com.mino.blogproj.service.BoardService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.validation.Valid;
 
 @RequiredArgsConstructor
 @Controller
@@ -91,6 +95,20 @@ public class BoardController {
     public String delete(@PathVariable Long id, @AuthenticationPrincipal MyUserDetails myUserDetails) {
         //소유자 확인은 서비스에서 수행하도록 해야한다.
         boardService.게시글삭제(id, myUserDetails.getUser().getId());
+        return "redirect:/";
+    }
+
+    //게시물 수정
+    @GetMapping("/s/board/{id}/updateForm")
+    public String updateForm(@PathVariable Long id, Model model, @AuthenticationPrincipal MyUserDetails myUserDetails) {
+        Board board = boardService.게시글수정보기(id, myUserDetails.getUser().getId());
+        model.addAttribute("board",board);
+        return "board/updateForm";
+    }
+    @PostMapping("/s/board/{id}/update")
+    public String update(@PathVariable Long id, @Valid BoardRequest.UpdateInDTO updateInDTO, Errors errors, @AuthenticationPrincipal MyUserDetails myUserDetails){
+        log.debug("디버그 : "+myUserDetails.getUser().getId());
+        boardService.게시글수정(id, updateInDTO, myUserDetails.getUser().getId());
         return "redirect:/";
     }
 }
